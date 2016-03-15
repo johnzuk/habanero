@@ -1,0 +1,7 @@
+### JetBrains
+.idea/
+### Composer
+vendor/
+### PHPUnit
+built/
+composer.lock
