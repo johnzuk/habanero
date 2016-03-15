@@ -1,0 +1,7 @@
+admin_route:
+  path: '/users'
+  action: 'Admin:users'
+  method: 'get'
+test_route:
+  path: '/user/{id:\d+}'
+  action: 'Admin:test'
