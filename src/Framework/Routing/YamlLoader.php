@@ -40,7 +40,7 @@ class YamlLoader implements LoaderInterface
                 $routes = $this->parser->parse(file_get_contents($routeFile));
 
                 foreach ($routes as $routeName => $route) {
-                    $method = isset($route['method']) ? $route['method'] : 'GET';
+                    $method = isset($route['method']) ? strtoupper($route['method']) : 'GET';
                     $routing[] = new Route($routeName, $route['path'], $directory.':'.$route['action'], $method);
                 }
 
