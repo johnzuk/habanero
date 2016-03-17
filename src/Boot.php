@@ -7,6 +7,7 @@ use Habanero\Exceptions\NoConfigException;
 use Habanero\Framework\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Pimple\Container;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Yaml\Parser;
 use Habanero\Framework\Routing\YamlLoader;
 use Habanero\Framework\Routing\Routing;
@@ -14,6 +15,8 @@ use Habanero\Framework\Routing\Route;
 use FastRoute\Dispatcher;
 use FastRoute;
 use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 
 class Boot
 {
@@ -63,6 +66,19 @@ class Boot
     protected $controller;
 
     /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+
+    /**
+     * @return EntityManager
+     */
+    public function getEntityManager()
+    {
+        return $this->entityManager;
+    }
+
+    /**
      * Boot constructor.
      * @param string $mainDirectory
      */
@@ -71,18 +87,23 @@ class Boot
         $this->handleRequest();
         $this->parser = new Parser();
         $this->mainDirectory = $mainDirectory;
-
     }
 
     public function boot()
     {
         $this->loadConfig();
         $this->loadRouting();
-        $this->route();
+
+        $this->prepareDoctrine();
+        $this->buildContainer();
+
+        if (php_sapi_name() != "cli") {
+            $this->route();
+        }
     }
 
     /**
-     * @param $handler
+     * @param string $handler
      * @param array $vars
      * @return Response
      */
@@ -100,8 +121,57 @@ class Boot
         if (!method_exists($this->controller, $method)) {
             throw new ActionNotFoundException(sprintf("Action '%s' not found"));
         }
-        //set some properties
+        $this->controller->setContainer($this->container);
+        $this->controller->setRequest($this->request);
+
         return call_user_func_array([$this->controller, $method], $vars);
+    }
+
+    protected function prepareDoctrine()
+    {
+        $paths = iterator_to_array($this->loadEntityPaths());
+
+        $config = Setup::createAnnotationMetadataConfiguration(
+            $paths,
+            false,
+            null,
+            null,
+            false
+        );
+        $this->entityManager = EntityManager::create($this->config['database'], $config);
+    }
+
+    protected function getModulesPaths()
+    {
+        $directories = new \DirectoryIterator($this->mainDirectory.DIRECTORY_SEPARATOR.$this->config['module']);
+        $directories = new \CallbackFilterIterator($directories, function (\SplFileInfo $directory){
+            return $directory->getBasename() != '.' && $directory->getBasename() != '..';
+        });
+
+        return $directories;
+    }
+
+    protected function loadEntityPaths()
+    {
+        foreach ($this->getModulesPaths() as $modulePath) {
+            $path = $this->config['module'].DIRECTORY_SEPARATOR.$modulePath.DIRECTORY_SEPARATOR."Entity";
+            if (file_exists($path)) {
+                yield $path;
+            }
+        }
+    }
+
+    protected function buildContainer()
+    {
+        $this->container = new Container();
+
+        $this->container['session'] = function ($c) {
+            return new Session();
+        };
+
+        $this->container['entity_manager'] = function($c) {
+            return $this->entityManager;
+        };
     }
 
     protected function route()
