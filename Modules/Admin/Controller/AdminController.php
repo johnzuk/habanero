@@ -8,9 +8,9 @@ class AdminController extends Controller
 {
     public function usersAction()
     {
-        /*return $this->render('base.html.twig', [
+        return $this->render('base.html.twig', [
             'name' => 'jan'
-        ]);*/
-        return new Response("To jest moja pierwsza strona WWW");
+        ]);
+        //return new Response("To jest moja pierwsza strona WWW");
     }
 }

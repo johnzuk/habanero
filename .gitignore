@@ -5,5 +5,8 @@ vendor/
 ### PHPUnit
 built/
 composer.lock
-
+### Main
 config.yaml
+### frontend
+/web/bower_components
+/web/node_modules

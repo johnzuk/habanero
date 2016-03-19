@@ -1,0 +1,21 @@
+{
+  "name": "habanero",
+  "homepage": "https://github.com/johnzuk/habanero",
+  "authors": [
+    "johnzuk <john_zuk@wp.pl>"
+  ],
+  "description": "habanero project",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-sass": "bootstrap-sass-official#~3.3.6"
+  }
+}

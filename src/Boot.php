@@ -110,7 +110,8 @@ class Boot
             $this->config->getAppPath()
         ]);
         $this->viewRender = new \Twig_Environment($viewLoader, array(
-            'cache' => $this->config->getViewCachePath(),
+            //'cache' => $this->config->getViewCachePath(),
+            'cache' => false
         ));
     }
 
