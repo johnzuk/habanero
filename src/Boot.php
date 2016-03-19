@@ -4,6 +4,7 @@ namespace Habanero;
 use Habanero\Exceptions\ActionNotFoundException;
 use Habanero\Exceptions\InvalidHandlerException;
 use Habanero\Exceptions\NoConfigException;
+use Habanero\Framework\Config\Config;
 use Habanero\Framework\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Pimple\Container;
@@ -41,14 +42,9 @@ class Boot
     protected $parser;
 
     /**
-     * @var array
+     * @var Config
      */
     protected $config;
-
-    /**
-     * @var string
-     */
-    protected $mainDirectory;
 
     /**
      * @var Route[]
@@ -71,6 +67,11 @@ class Boot
     protected $entityManager;
 
     /**
+     * @var \Twig_Environment
+     */
+    protected $viewRender;
+
+    /**
      * @return EntityManager
      */
     public function getEntityManager()
@@ -85,21 +86,32 @@ class Boot
     public function __construct($mainDirectory)
     {
         $this->handleRequest();
+        $this->config = new Config($mainDirectory);
+
         $this->parser = new Parser();
-        $this->mainDirectory = $mainDirectory;
     }
 
     public function boot()
     {
-        $this->loadConfig();
         $this->loadRouting();
 
         $this->prepareDoctrine();
+        $this->buildViewRender();
         $this->buildContainer();
 
         if (php_sapi_name() != "cli") {
             $this->route();
         }
+    }
+
+    protected function buildViewRender()
+    {
+        $viewLoader = new \Twig_Loader_Filesystem([
+            $this->config->getAppPath()
+        ]);
+        $this->viewRender = new \Twig_Environment($viewLoader, array(
+            'cache' => $this->config->getViewCachePath(),
+        ));
     }
 
     /**
@@ -129,7 +141,7 @@ class Boot
 
     protected function prepareDoctrine()
     {
-        $paths = iterator_to_array($this->loadEntityPaths());
+        $paths = iterator_to_array($this->config->getEntityPaths());
 
         $config = Setup::createAnnotationMetadataConfiguration(
             $paths,
@@ -141,26 +153,6 @@ class Boot
         $this->entityManager = EntityManager::create($this->config['database'], $config);
     }
 
-    protected function getModulesPaths()
-    {
-        $directories = new \DirectoryIterator($this->mainDirectory.DIRECTORY_SEPARATOR.$this->config['module']);
-        $directories = new \CallbackFilterIterator($directories, function (\SplFileInfo $directory){
-            return $directory->getBasename() != '.' && $directory->getBasename() != '..';
-        });
-
-        return $directories;
-    }
-
-    protected function loadEntityPaths()
-    {
-        foreach ($this->getModulesPaths() as $modulePath) {
-            $path = $this->config['module'].DIRECTORY_SEPARATOR.$modulePath.DIRECTORY_SEPARATOR."Entity";
-            if (file_exists($path)) {
-                yield $path;
-            }
-        }
-    }
-
     protected function buildContainer()
     {
         $this->container = new Container();
@@ -169,8 +161,12 @@ class Boot
             return new Session();
         };
 
-        $this->container['entity_manager'] = function($c) {
+        $this->container['entity_manager'] = function ($c) {
             return $this->entityManager;
+        };
+
+        $this->container['view'] = function ($c) {
+            return $this->viewRender;
         };
     }
 
@@ -218,7 +214,7 @@ class Boot
     protected function loadRouting()
     {
         $loader = new YamlLoader();
-        $routing = new Routing($loader, $this->mainDirectory.DIRECTORY_SEPARATOR.$this->config['module']);
+        $routing = new Routing($loader, $this->config->getModuleDirPatch());
         $routing->load();
 
         $this->rawRouting = $routing->getRouting();
@@ -226,12 +222,4 @@ class Boot
         $this->buildRouting();
     }
 
-    protected function loadConfig()
-    {
-        $configFile = $this->mainDirectory.DIRECTORY_SEPARATOR.'config.yaml';
-        if (!is_readable($configFile)) {
-            throw new NoConfigException(sprintf('No found config file at: %s', $configFile));
-        }
-        $this->config = $this->parser->parse(file_get_contents($configFile));
-    }
 }

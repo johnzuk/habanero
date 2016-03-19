@@ -4,6 +4,7 @@ namespace Habanero\Framework;
 use Symfony\Component\HttpFoundation\Request;
 use Pimple\Container;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManager;
 
 class Controller
@@ -64,5 +65,20 @@ class Controller
     public function getEntityManager()
     {
         return $this->container['entity_manager'];
+    }
+
+    /**
+     * @return \Twig_Environment
+     */
+    public function getRenderView()
+    {
+        return $this->container['view'];
+    }
+
+    public function render($file, $vars = [])
+    {
+        $response = new Response($this->getRenderView()->render($file, $vars));
+        $response->prepare($this->request);
+        return $response;
     }
 }
