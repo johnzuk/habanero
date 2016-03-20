@@ -1,0 +1,6 @@
+Order Deny,Allow
+Deny from all
+<Files "config.yaml">
+    Order Allow,Deny
+    Deny from all
+</Files>

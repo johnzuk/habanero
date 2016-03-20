@@ -45,7 +45,7 @@ class Config implements \ArrayAccess
      */
     public function getConfigFilePath()
     {
-        return $this->mainPath.DIRECTORY_SEPARATOR.'config.yaml';
+        return $this->getAppPath().DIRECTORY_SEPARATOR.'config.yaml';
     }
 
     /**
