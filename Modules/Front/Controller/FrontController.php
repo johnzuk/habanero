@@ -2,7 +2,6 @@
 namespace Front\Controller;
 use Habanero\Exceptions\NotFoundException;
 use Habanero\Framework\Controller;
-use Front\Entity\Page;
 
 class FrontController extends Controller
 {

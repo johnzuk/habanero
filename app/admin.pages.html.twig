@@ -1,0 +1,29 @@
+{% extends 'admin.base.html.twig' %}
+
+{% block body %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for page in pages %}
+                    <tr>
+                        <td>{{ page.id }}</td>
+                        <td>{{ page.pageName }}</td>
+                        <td>{{ page.slug }}</td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" href="/admin/page/{{ page.id }}"><i class="fa fa-edit"></i></a>
+                            <button class="btn btn-danger btn-sm page-delete" data-id="{{ page.id }}"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
