@@ -14,6 +14,12 @@ login_route:
 register_route:
   path: '/register'
   action: 'Front:register'
+  method: 'post'
+
+register_route_get:
+  path: '/register'
+  action: 'Front:register'
+  method: 'get'
 
 login_check:
   path: '/login_check'

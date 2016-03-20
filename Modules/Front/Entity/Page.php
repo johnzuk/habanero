@@ -1,5 +1,6 @@
 <?php
 namespace Front\Entity;
+
 use Doctrine\ORM\Mapping as ORM;
 
 /**
