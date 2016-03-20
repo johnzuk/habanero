@@ -24,3 +24,18 @@ admin_page_delete_route:
 admin_users_route:
   path: '/admin/users'
   action: 'Admin:users'
+
+admin_user_route:
+  path: '/admin/user[/{id:\d+}]'
+  action: 'Admin:user'
+  method: 'get'
+
+admin_user_route_save:
+  path: '/admin/user[/{id:\d+}]'
+  action: 'Admin:user'
+  method: 'post'
+
+admin_user_delete_route:
+  path: '/admin/user/delete'
+  action: 'Admin:userDelete'
+  method: 'post'
