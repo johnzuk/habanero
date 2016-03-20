@@ -1,9 +1,10 @@
 <?php
-namespace Admin\Entity;
+namespace Front\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
+ *
  * @ORM\Table(name="page")
  */
 class Page
@@ -35,7 +36,13 @@ class Page
     protected $slug;
 
     /**
-     * @return mixed
+     * @ORM\Column(type="string", length=100)
+     * @var string
+     */
+    protected $page_name;
+
+    /**
+     * @return int
      */
     public function getId()
     {
@@ -43,7 +50,7 @@ class Page
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getContent()
     {
@@ -51,7 +58,7 @@ class Page
     }
 
     /**
-     * @param mixed $content
+     * @param string $content
      */
     public function setContent($content)
     {
@@ -89,4 +96,21 @@ class Page
     {
         $this->slug = $slug;
     }
+
+    /**
+     * @return string
+     */
+    public function getPageName()
+    {
+        return $this->page_name;
+    }
+
+    /**
+     * @param string $page_name
+     */
+    public function setPageName($page_name)
+    {
+        $this->page_name = $page_name;
+    }
 }
+

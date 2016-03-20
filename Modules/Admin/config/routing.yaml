@@ -1,7 +1,15 @@
 admin_route:
-  path: '/users'
-  action: 'Admin:users'
-  method: 'get'
-test_route:
-  path: '/'
-  action: 'Admin:users'
+  path: '/admin'
+  action: 'Admin:index'
+
+admin_pages_route:
+  path: '/admin/pages'
+  action: 'Admin:pages'
+
+admin_page_route:
+  path: '/admin/page[/{id:\d+}]'
+  action: 'Admin:page'
+
+admin_page_delete_route:
+  path: '/admin/page/{id:\d+}/delete'
+  action: 'Admin:pageDelete'

@@ -3,7 +3,9 @@ namespace Habanero;
 
 use Habanero\Exceptions\ActionNotFoundException;
 use Habanero\Exceptions\InvalidHandlerException;
+use Habanero\Exceptions\MethodNotAllowedException;
 use Habanero\Exceptions\NoConfigException;
+use Habanero\Exceptions\NotFoundException;
 use Habanero\Framework\Config\Config;
 use Habanero\Framework\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,7 +102,23 @@ class Boot
         $this->buildContainer();
 
         if (php_sapi_name() != "cli") {
-            $this->route();
+            try {
+                $this->route();
+            } catch (NotFoundException $e) {
+                $response = new Response($this->viewRender->render('error404.html.twig', [
+                    'message' => $e->getMessage()
+                ]), 404);
+                $response->prepare($this->request);
+                $response->send();
+            } catch (MethodNotAllowedException $e) {
+                $this->viewRender->render('error405.html.twig');
+                $response = new Response($this->viewRender->render('error405.html.twig', [
+                    'message' => $e->getMessage()
+                ]), 405);
+                $response->prepare($this->request);
+                $response->send();
+            }
+
         }
     }
 
@@ -110,9 +128,11 @@ class Boot
             $this->config->getAppPath()
         ]);
         $this->viewRender = new \Twig_Environment($viewLoader, array(
+            'debug' => true,
             //'cache' => $this->config->getViewCachePath(),
             'cache' => false
         ));
+        $this->viewRender->addExtension(new \Twig_Extension_Debug());
     }
 
     /**
@@ -180,11 +200,11 @@ class Boot
 
         switch ($routeInfo[0]) {
             case FastRoute\Dispatcher::NOT_FOUND:
-                echo 'blad 404';
+                throw new NotFoundException(sprintf("Not found route: '%s'", $routeInfo[0]));
                 break;
             case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                 $allowedMethods = $routeInfo[1];
-                echo 'zla metoda';
+                throw new MethodNotAllowedException(sprintf("This method is not allowed. Allowed method: %s", $allowedMethods[0]));
                 break;
             case FastRoute\Dispatcher::FOUND:
                 $handler = $routeInfo[1];

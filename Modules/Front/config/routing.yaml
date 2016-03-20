@@ -1,0 +1,25 @@
+index_route:
+  path: '/'
+  action: 'Front:index'
+  method: 'get'
+
+page_route:
+  path: '/page/{page}'
+  action: 'Front:page'
+
+login_route:
+  path: '/login'
+  action: 'Front:login'
+
+register_route:
+  path: '/register'
+  action: 'Front:register'
+
+login_check:
+  path: '/login_check'
+  action: 'Front:loginCheck'
+  method: 'post'
+
+log_out:
+  path: '/log_out'
+  action: 'Front:logOut'

@@ -30,8 +30,9 @@ gulp.task('css', function(cb) {
         .pipe(sass({
             style: 'compressed',
             includePaths: ['.']
-        })).
-        pipe(replace('../fonts/', 'fonts/'))
+        }))
+        .pipe(replace('../fonts/', 'fonts/'))
+        .pipe(replace('fonts/bootstrap/', 'fonts/'))
         .pipe(autoprefixer(), {
             browsers: [
                 'last 2 versions',
