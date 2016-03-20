@@ -9,6 +9,12 @@ admin_pages_route:
 admin_page_route:
   path: '/admin/page[/{id:\d+}]'
   action: 'Admin:page'
+  method: 'get'
+
+admin_page_route_save:
+  path: '/admin/page[/{id:\d+}]'
+  action: 'Admin:page'
+  method: 'post'
 
 admin_page_delete_route:
   path: '/admin/page/delete'

@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Pimple\Container;
 use Doctrine\ORM\EntityManager;
 
@@ -75,11 +76,13 @@ class Controller
     }
 
     /**
+     * @param null $data
+     * @param array $options
      * @return FormBuilderInterface
      */
-    public function createFormBuilder()
+    public function createFormBuilder($data = null, array $options = array())
     {
-        return $this->getFormFactory()->createBuilder();
+        return $this->getFormFactory()->createBuilder(FormType::class, $data, $options);
     }
 
     /**
