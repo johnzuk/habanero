@@ -10,4 +10,5 @@ config.yaml
 ### frontend
 /web/bower_components
 /web/node_modules
-/web/dist
+/web/dist/*
+!/web/dist/.gitkeep
