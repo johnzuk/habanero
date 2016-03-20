@@ -130,22 +130,20 @@ class Boot
 
         if (php_sapi_name() != "cli") {
             try {
-                $this->route();
+                $response = $this->route();
             } catch (NotFoundException $e) {
                 $response = new Response($this->viewRender->render('error404.html.twig', [
                     'message' => $e->getMessage()
                 ]), 404);
-                $response->prepare($this->request);
-                $response->send();
             } catch (MethodNotAllowedException $e) {
                 $this->viewRender->render('error405.html.twig');
                 $response = new Response($this->viewRender->render('error405.html.twig', [
                     'message' => $e->getMessage()
                 ]), 405);
-                $response->prepare($this->request);
-                $response->send();
             }
 
+            $response->prepare($this->request);
+            $response->send();
         }
     }
 
@@ -296,9 +294,10 @@ class Boot
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
 
-                $response = $this->fireController($handler, $vars);
-                $response->prepare($this->request);
-                $response->send();
+                return $this->fireController($handler, $vars);
+                break;
+            default:
+                throw new NotFoundException(sprintf("Not found route: '%s'", $routeInfo[0]));
                 break;
         }
     }
