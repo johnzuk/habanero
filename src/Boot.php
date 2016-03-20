@@ -10,6 +10,9 @@ use Habanero\Framework\Controller;
 use Habanero\Framework\Routing\YamlLoader;
 use Habanero\Framework\Routing\Routing;
 use Habanero\Framework\Routing\Route;
+use Habanero\Framework\Service\DoctrineService;
+use Habanero\Framework\Service\MailService;
+use Habanero\Framework\Service\TwigService;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -27,7 +30,6 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use FastRoute\Dispatcher;
 use FastRoute;
-use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Pimple\Container;
 
@@ -124,6 +126,7 @@ class Boot
 
         $this->prepareDoctrine();
         $this->buildViewRender();
+        $this->validator = Validation::createValidator();
         $this->buildContainer();
         $this->prepareMailer();
         $this->prepareFormFactory();
@@ -149,45 +152,7 @@ class Boot
 
     protected function buildViewRender()
     {
-        $translator = new Translator('en');
-        $translator->addLoader('xlf', new XliffFileLoader());
-        $translator->addResource(
-            'xlf',
-            $this->config->getVendorPath().'/symfony/form/Resources/translations/validators.en.xlf',
-            'en',
-            'validators'
-        );
-        $translator->addResource(
-            'xlf',
-            $this->config->getVendorPath().'/symfony/validator/Resources/translations/validators.en.xlf',
-            'en',
-            'validators'
-        );
-
-        $params = [
-            'debug' => $this->config['app']['debug'],
-            'cache' => !$this->config['app']['dev'] ? $this->config->getViewCachePath() : false
-        ];
-
-        $this->viewRender = new \Twig_Environment(new \Twig_Loader_Filesystem([
-            $this->config->getAppPath(),
-            $this->config->getVendorPath().'/symfony/twig-bridge/Resources/views/Form'
-        ]), $params);
-
-        $formEngine = new TwigRendererEngine([
-            'form_div_layout.html.twig'
-        ]);
-        $formEngine->setEnvironment($this->viewRender);
-
-        $this->validator = Validation::createValidator();
-
-        if ($this->config['app']['debug']) {
-            $this->viewRender->addExtension(new \Twig_Extension_Debug());
-        }
-        $this->viewRender->addExtension(new TranslationExtension($translator));
-        $this->viewRender->addExtension(
-            new FormExtension(new TwigRenderer($formEngine))
-        );
+        $this->viewRender = (new TwigService())->getService($this->config);
     }
 
     /**
@@ -225,33 +190,12 @@ class Boot
 
     protected function prepareMailer()
     {
-        $mailerConfig = $this->config['mailer'];
-        $this->mailer = new \PHPMailer();
-
-        if ($mailerConfig['smtp']) {
-            $this->mailer->isSMTP();
-        }
-
-        $this->mailer->Host = $mailerConfig['host'];
-        $this->mailer->SMTPAuth = $mailerConfig['SMTPAuth'];
-        $this->mailer->Username = $mailerConfig['username'];
-        $this->mailer->Password = $mailerConfig['password'];
-        $this->mailer->SMTPSecure = $mailerConfig['SMTPSecure'];
-        $this->mailer->Port = $mailerConfig['port'];
+        $this->mailer = (new MailService())->getService($this->config);
     }
 
     protected function prepareDoctrine()
     {
-        $paths = iterator_to_array($this->config->getEntityPaths());
-
-        $config = Setup::createAnnotationMetadataConfiguration(
-            $paths,
-            false,
-            null,
-            null,
-            false
-        );
-        $this->entityManager = EntityManager::create($this->config['database'], $config);
+        $this->entityManager = (new DoctrineService())->getService($this->config);
     }
 
     protected function buildContainer()
