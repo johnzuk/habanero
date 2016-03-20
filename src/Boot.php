@@ -183,7 +183,9 @@ class Boot
 
         $this->validator = Validation::createValidator();
 
-        $this->viewRender->addExtension(new \Twig_Extension_Debug());
+        if ($this->config['app']['debug']) {
+            $this->viewRender->addExtension(new \Twig_Extension_Debug());
+        }
         $this->viewRender->addExtension(new TranslationExtension($translator));
         $this->viewRender->addExtension(
             new FormExtension(new TwigRenderer($formEngine))
