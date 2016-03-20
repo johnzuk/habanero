@@ -320,7 +320,7 @@ class Boot
         } else {
             $this->dispatcher = FastRoute\cachedDispatcher($callback, [
                 'cacheFile' => $this->config->getRouteCachePatch().DIRECTORY_SEPARATOR.'route.cache',
-                'cacheDisabled' => IS_DEBUG_ENABLED,
+                'cacheDisabled' => false,
             ]);
         }
 
