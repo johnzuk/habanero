@@ -26,20 +26,63 @@ class FrontController extends Controller
 
     public function loginAction()
     {
-        return $this->render('login.html.twig', [
-            'title' => 'Login'
-        ]);
-    }
+        $em = $this->getEntityManager();
+        $repository = $em->getRepository('Front\Entity\User');
 
-    public function loginCheckAction()
-    {
-        var_dump($this->request->request);
-        exit();
+        $form = $this->createFormBuilder()
+            ->add('login', TextType::class, [
+                'label' => 'Login',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('password', PasswordType::class, [
+                'label' => 'Password',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('Sign in', SubmitType::class, [
+                'attr' => [
+                    'class' => 'btn btn-lg btn-primary btn-block'
+                ]
+            ])
+            ->getForm();
+
+        $form->handleRequest();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $username = $form->getData()['login'];
+            $password = $form->getData()['password'];
+
+            $user = $repository->createQueryBuilder('u')
+                ->where('u.name = :username OR u.email = :email')
+                ->setParameter('username', $username)
+                ->setParameter('email', $username)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if (password_verify($password, $user->getPassword())) {
+                $this->getSession()->set('login', true);
+                $this->getSession()->set('name', $user->getName());
+                $this->getSession()->set('id', $user->getId());
+
+                return new RedirectResponse('/admin');
+            }
+        }
+
+        return $this->render('login.html.twig', [
+            'title' => 'Login',
+            'form' => $form->createView()
+        ]);
     }
 
     public function logOutAction()
     {
-        //logout
+        $this->getSession()->clear();
+
+        return new RedirectResponse('/');
     }
 
     public function registerAction()

@@ -10,6 +10,12 @@ page_route:
 login_route:
   path: '/login'
   action: 'Front:login'
+  method: 'get'
+
+login_route_check:
+  path: '/login'
+  action: 'Front:login'
+  method: 'post'
 
 register_route:
   path: '/register'
@@ -20,11 +26,6 @@ register_route_get:
   path: '/register'
   action: 'Front:register'
   method: 'get'
-
-login_check:
-  path: '/login_check'
-  action: 'Front:loginCheck'
-  method: 'post'
 
 log_out:
   path: '/log_out'
