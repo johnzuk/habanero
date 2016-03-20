@@ -4,6 +4,10 @@ namespace Habanero\Framework\Config;
 use Symfony\Component\Yaml\Parser;
 use Habanero\Exceptions\NoConfigException;
 
+/**
+ * Class Config
+ * @package Habanero\Framework\Config
+ */
 class Config implements \ArrayAccess
 {
     /**
@@ -122,27 +126,45 @@ class Config implements \ArrayAccess
         }
     }
 
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
     public function offsetExists($offset)
     {
         return isset($this->config[$offset]);
     }
 
+    /**
+     * @param mixed $offset
+     * @return mixed
+     */
     public function offsetGet($offset)
     {
         return $this->config[$offset];
     }
 
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     */
     public function offsetSet($offset, $value)
     {
         $this->config[$offset] = $value;
     }
 
+    /**
+     * @param mixed $offset
+     */
     public function offsetUnset($offset)
     {
         unset($this->config[$offset]);
     }
 
 
+    /**
+     * Load config
+     */
     protected function loadConfig()
     {
         $configFile = $this->getConfigFilePath();
