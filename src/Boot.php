@@ -166,14 +166,15 @@ class Boot
             'validators'
         );
 
+        $params = [
+            'debug' => $this->config['app']['debug'],
+            'cache' => !$this->config['app']['dev'] ? $this->config->getViewCachePath() : false
+        ];
+
         $this->viewRender = new \Twig_Environment(new \Twig_Loader_Filesystem([
             $this->config->getAppPath(),
             $this->config->getVendorPath().'/symfony/twig-bridge/Resources/views/Form'
-        ]), [
-            'debug' => true,
-            //'cache' => $this->config->getViewCachePath(),
-            'cache' => false
-        ]);
+        ]), $params);
 
         $formEngine = new TwigRendererEngine([
             'form_div_layout.html.twig'
@@ -308,11 +309,21 @@ class Boot
 
     protected function buildRouting()
     {
-        $this->dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+        $callback = function(FastRoute\RouteCollector $r) {
             foreach ($this->rawRouting as $route) {
                 $r->addRoute($route->getMethod(), $this->baseUrl.$route->getPath(), $route->getAction());
             }
-        });
+        };
+
+        if ($this->config['app']['dev']) {
+            $this->dispatcher = FastRoute\simpleDispatcher($callback);
+        } else {
+            $this->dispatcher = FastRoute\cachedDispatcher($callback, [
+                'cacheFile' => $this->config->getRouteCachePatch().DIRECTORY_SEPARATOR.'route.cache',
+                'cacheDisabled' => IS_DEBUG_ENABLED,
+            ]);
+        }
+
     }
 
     protected function loadRouting()
@@ -325,5 +336,4 @@ class Boot
 
         $this->buildRouting();
     }
-
 }

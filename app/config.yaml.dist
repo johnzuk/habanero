@@ -4,3 +4,14 @@ database:
   user: ''
   password: ''
   dbname: ''
+mailer:
+  smtp: true
+  host: ''
+  SMTPAuth: true
+  username: ''
+  password: ''
+  SMTPSecure: 'ssl'
+  port: 465
+app:
+  debug: true #for production set to false
+  dev: true #for production set to false
