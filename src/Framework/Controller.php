@@ -75,6 +75,19 @@ class Controller
         return $this->container['view'];
     }
 
+    /**
+     * @return \PHPMailer
+     */
+    public function getMailer()
+    {
+        return $this->container['mailer'];
+    }
+
+    /**
+     * @param $file
+     * @param array $vars
+     * @return Response
+     */
     public function render($file, $vars = [])
     {
         $response = new Response($this->getRenderView()->render($file, $vars));

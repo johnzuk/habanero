@@ -4,22 +4,21 @@ namespace Habanero;
 use Habanero\Exceptions\ActionNotFoundException;
 use Habanero\Exceptions\InvalidHandlerException;
 use Habanero\Exceptions\MethodNotAllowedException;
-use Habanero\Exceptions\NoConfigException;
 use Habanero\Exceptions\NotFoundException;
 use Habanero\Framework\Config\Config;
 use Habanero\Framework\Controller;
-use Symfony\Component\HttpFoundation\Request;
-use Pimple\Container;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Yaml\Parser;
 use Habanero\Framework\Routing\YamlLoader;
 use Habanero\Framework\Routing\Routing;
 use Habanero\Framework\Routing\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Yaml\Parser;
+use Symfony\Component\HttpFoundation\Response;
 use FastRoute\Dispatcher;
 use FastRoute;
-use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
+use Pimple\Container;
 
 class Boot
 {
@@ -74,6 +73,11 @@ class Boot
     protected $viewRender;
 
     /**
+     * @var \PHPMailer
+     */
+    protected $mailer;
+
+    /**
      * @return EntityManager
      */
     public function getEntityManager()
@@ -100,6 +104,7 @@ class Boot
         $this->prepareDoctrine();
         $this->buildViewRender();
         $this->buildContainer();
+        $this->prepareMailer();
 
         if (php_sapi_name() != "cli") {
             try {
@@ -160,6 +165,24 @@ class Boot
         return call_user_func_array([$this->controller, $method], $vars);
     }
 
+
+    protected function prepareMailer()
+    {
+        $mailerConfig = $this->config['mailer'];
+        $this->mailer = new \PHPMailer();
+
+        if ($mailerConfig['smtp']) {
+            $this->mailer->isSMTP();
+        }
+
+        $this->mailer->Host = $mailerConfig['host'];
+        $this->mailer->SMTPAuth = $mailerConfig['SMTPAuth'];
+        $this->mailer->Username = $mailerConfig['username'];
+        $this->mailer->Password = $mailerConfig['password'];
+        $this->mailer->SMTPSecure = $mailerConfig['SMTPSecure'];
+        $this->mailer->Port = $mailerConfig['port'];
+    }
+
     protected function prepareDoctrine()
     {
         $paths = iterator_to_array($this->config->getEntityPaths());
@@ -188,6 +211,10 @@ class Boot
 
         $this->container['view'] = function ($c) {
             return $this->viewRender;
+        };
+
+        $this->container['mailer'] = function ($c) {
+            return $this->mailer;
         };
     }
 

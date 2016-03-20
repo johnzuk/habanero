@@ -21,6 +21,7 @@
     "pimple/pimple": "3.0.x-dev",
     "symfony/yaml": "3.0.x-dev",
     "doctrine/orm": "2.6.x-dev",
-    "twig/twig": "1.6.0"
+    "twig/twig": "1.6.0",
+    "phpmailer/phpmailer": "v5.2.14"
   }
 }
