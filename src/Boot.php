@@ -157,7 +157,7 @@ class Boot
 
         $this->controller = new $class();
         if (!method_exists($this->controller, $method)) {
-            throw new ActionNotFoundException(sprintf("Action '%s' not found"));
+            throw new ActionNotFoundException(sprintf("Action '%s' not found", $method));
         }
         $this->controller->setContainer($this->container);
         $this->controller->setRequest($this->request);

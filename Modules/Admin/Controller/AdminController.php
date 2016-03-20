@@ -6,6 +6,11 @@ use Admin\Entity\Page;
 
 class AdminController extends Controller
 {
+    public function indexAction()
+    {
+        return $this->render('admin.base.html.twig');
+    }
+
     public function usersAction()
     {
         return $this->render('base.html.twig', [
