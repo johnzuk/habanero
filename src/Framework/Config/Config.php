@@ -102,6 +102,14 @@ class Config implements \ArrayAccess
     }
 
     /**
+     * @return string
+     */
+    public function getVendorPath()
+    {
+        return realpath($this->mainPath.'/vendor');
+    }
+
+    /**
      * @return \Generator
      */
     public function getEntityPaths()

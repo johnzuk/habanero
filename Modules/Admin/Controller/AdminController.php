@@ -1,8 +1,9 @@
 <?php
 namespace Admin\Controller;
 
-use \Habanero\Framework\Controller;
+use Habanero\Framework\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class AdminController extends Controller
 {
@@ -45,7 +46,15 @@ class AdminController extends Controller
 
     public function pageAction($pageId)
     {
+        $form = $this->createFormBuilder()
+            ->add('BLALBA', TextType::class, [
+                'label' => 'test'
+            ])
+            ->getForm();
 
+        return $this->render('admin.page.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     public function usersAction()

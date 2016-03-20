@@ -2,9 +2,11 @@
 namespace Habanero\Framework;
 
 use Symfony\Component\HttpFoundation\Request;
-use Pimple\Container;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormBuilderInterface;
+use Pimple\Container;
 use Doctrine\ORM\EntityManager;
 
 class Controller
@@ -18,6 +20,11 @@ class Controller
      * @var Container
      */
     protected $container;
+
+    /**
+     * @var FormFactoryInterface
+     */
+    protected $formFactory;
 
     /**
      * @return Request
@@ -49,6 +56,30 @@ class Controller
     public function setContainer($container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * @return FormFactoryInterface
+     */
+    public function getFormFactory()
+    {
+        return $this->formFactory;
+    }
+
+    /**
+     * @param FormFactoryInterface $formFactory
+     */
+    public function setFormFactory($formFactory)
+    {
+        $this->formFactory = $formFactory;
+    }
+
+    /**
+     * @return FormBuilderInterface
+     */
+    public function createFormBuilder()
+    {
+        return $this->getFormFactory()->createBuilder();
     }
 
     /**

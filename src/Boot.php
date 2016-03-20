@@ -10,10 +10,21 @@ use Habanero\Framework\Controller;
 use Habanero\Framework\Routing\YamlLoader;
 use Habanero\Framework\Routing\Routing;
 use Habanero\Framework\Routing\Route;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\Forms;
+use Symfony\Bridge\Twig\Form\TwigRendererEngine;
+use Symfony\Bridge\Twig\Extension\FormExtension;
+use Symfony\Bridge\Twig\Form\TwigRenderer;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
+use Symfony\Bridge\Twig\Extension\TranslationExtension;
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use FastRoute\Dispatcher;
 use FastRoute;
 use Doctrine\ORM\Tools\Setup;
@@ -78,6 +89,16 @@ class Boot
     protected $mailer;
 
     /**
+     * @var FormFactoryInterface
+     */
+    protected $formFactory;
+
+    /**
+     * @var ValidatorInterface
+     */
+    protected $validator;
+
+    /**
      * @return EntityManager
      */
     public function getEntityManager()
@@ -105,6 +126,7 @@ class Boot
         $this->buildViewRender();
         $this->buildContainer();
         $this->prepareMailer();
+        $this->prepareFormFactory();
 
         if (php_sapi_name() != "cli") {
             try {
@@ -129,15 +151,42 @@ class Boot
 
     protected function buildViewRender()
     {
-        $viewLoader = new \Twig_Loader_Filesystem([
-            $this->config->getAppPath()
-        ]);
-        $this->viewRender = new \Twig_Environment($viewLoader, array(
+        $translator = new Translator('en');
+        $translator->addLoader('xlf', new XliffFileLoader());
+        $translator->addResource(
+            'xlf',
+            $this->config->getVendorPath().'/symfony/form/Resources/translations/validators.en.xlf',
+            'en',
+            'validators'
+        );
+        $translator->addResource(
+            'xlf',
+            $this->config->getVendorPath().'/symfony/validator/Resources/translations/validators.en.xlf',
+            'en',
+            'validators'
+        );
+
+        $this->viewRender = new \Twig_Environment(new \Twig_Loader_Filesystem([
+            $this->config->getAppPath(),
+            $this->config->getVendorPath().'/symfony/twig-bridge/Resources/views/Form'
+        ]), [
             'debug' => true,
             //'cache' => $this->config->getViewCachePath(),
             'cache' => false
-        ));
+        ]);
+
+        $formEngine = new TwigRendererEngine([
+            'form_div_layout.html.twig'
+        ]);
+        $formEngine->setEnvironment($this->viewRender);
+
+        $this->validator = Validation::createValidator();
+
         $this->viewRender->addExtension(new \Twig_Extension_Debug());
+        $this->viewRender->addExtension(new TranslationExtension($translator));
+        $this->viewRender->addExtension(
+            new FormExtension(new TwigRenderer($formEngine))
+        );
     }
 
     /**
@@ -161,10 +210,17 @@ class Boot
         }
         $this->controller->setContainer($this->container);
         $this->controller->setRequest($this->request);
+        $this->controller->setFormFactory($this->formFactory);
 
         return call_user_func_array([$this->controller, $method], $vars);
     }
 
+    public function prepareFormFactory()
+    {
+        $this->formFactory = Forms::createFormFactoryBuilder()
+            ->addExtension(new ValidatorExtension($this->validator))
+            ->getFormFactory();
+    }
 
     protected function prepareMailer()
     {

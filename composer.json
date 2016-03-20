@@ -21,7 +21,11 @@
     "pimple/pimple": "3.0.x-dev",
     "symfony/yaml": "3.0.x-dev",
     "doctrine/orm": "2.6.x-dev",
-    "twig/twig": "1.6.0",
-    "phpmailer/phpmailer": "v5.2.14"
+    "phpmailer/phpmailer": "v5.2.14",
+    "symfony/form": "3.0.x-dev",
+    "symfony/twig-bridge": "3.0.x-dev",
+    "symfony/translation": "3.0.x-dev",
+    "symfony/config": "3.0.x-dev",
+    "symfony/validator": "3.0.x-dev"
   }
 }
