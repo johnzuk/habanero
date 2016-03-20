@@ -78,6 +78,7 @@ class FrontController extends Controller
             $em->persist($user);
             $em->flush();
 
+            $this->sendRegisterEmail($user);
             return new RedirectResponse('/login');
         }
 
@@ -102,6 +103,20 @@ class FrontController extends Controller
             'content' => $page->getContent(),
             'pages' => $pages
         ]);
+    }
+
+    protected function sendRegisterEmail(User $user)
+    {
+        $mail = $this->getMailer();
+
+        $mail->setFrom('contact@habanero.dev', 'Habanero');
+        $mail->addAddress($user->getEmail(), $user->getName());
+        $mail->isHTML(true);
+
+        $mail->Subject = 'New account created in Habanero.dev';
+        $mail->Body = 'Welcome in habanero.dev';
+
+        $mail->send();
     }
 
     /**
