@@ -28,28 +28,7 @@ class FrontController extends Controller
     {
         $em = $this->getEntityManager();
         $repository = $em->getRepository('Front\Entity\User');
-
-        $form = $this->createFormBuilder()
-            ->add('login', TextType::class, [
-                'label' => 'Login',
-                'attr' => [
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('password', PasswordType::class, [
-                'label' => 'Password',
-                'attr' => [
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('Sign in', SubmitType::class, [
-                'attr' => [
-                    'class' => 'btn btn-lg btn-primary btn-block'
-                ]
-            ])
-            ->getForm();
-
-        $form->handleRequest();
+        $form = $this->getLoginForm();
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -63,12 +42,10 @@ class FrontController extends Controller
                 ->getQuery()
                 ->getOneOrNullResult();
 
-            if (password_verify($password, $user->getPassword())) {
-                $this->getSession()->set('login', true);
-                $this->getSession()->set('name', $user->getName());
-                $this->getSession()->set('id', $user->getId());
-
-                return new RedirectResponse('/admin');
+            if ($user !== null) {
+                if (password_verify($password, $user->getPassword())) {
+                    return $this->logIn($user);
+                }
             }
         }
 
@@ -88,41 +65,7 @@ class FrontController extends Controller
     public function registerAction()
     {
         $user = new User();
-        $form = $this->createFormBuilder($user)
-            ->add('email', EmailType::class, [
-                'attr' => [
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('name', TextType::class, [
-                'attr' => [
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('plainPassword', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'first_options'  => [
-                    'label' => 'Password',
-                    'attr' => [
-                        'class' => 'form-control'
-                    ]
-                ],
-                'second_options' => [
-                    'label' => 'Repeat Password',
-                    'attr' => [
-                        'class' => 'form-control'
-                    ]
-                ]
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Register',
-                'attr' => [
-                    'class' => 'btn btn-success pull-right'
-                ]
-            ])
-            ->getForm();
-
-        $form->handleRequest();
+        $form = $this->getRegisterForm($user);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -159,5 +102,89 @@ class FrontController extends Controller
             'content' => $page->getContent(),
             'pages' => $pages
         ]);
+    }
+
+    /**
+     * @param User $user
+     * @return \Symfony\Component\Form\Form
+     */
+    protected function getRegisterForm(User $user)
+    {
+        $form = $this->createFormBuilder($user)
+            ->add('email', EmailType::class, [
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('name', TextType::class, [
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('plainPassword', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'first_options'  => [
+                    'label' => 'Password',
+                    'attr' => [
+                        'class' => 'form-control'
+                    ]
+                ],
+                'second_options' => [
+                    'label' => 'Repeat Password',
+                    'attr' => [
+                        'class' => 'form-control'
+                    ]
+                ]
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Register',
+                'attr' => [
+                    'class' => 'btn btn-success pull-right'
+                ]
+            ])
+            ->getForm();
+
+        $form->handleRequest();
+
+        return $form;
+    }
+
+    /**
+     * @return \Symfony\Component\Form\Form
+     */
+    protected function getLoginForm()
+    {
+        $form = $this->createFormBuilder()
+            ->add('login', TextType::class, [
+                'label' => 'Login',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('password', PasswordType::class, [
+                'label' => 'Password',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('Sign in', SubmitType::class, [
+                'attr' => [
+                    'class' => 'btn btn-lg btn-primary btn-block'
+                ]
+            ])
+            ->getForm();
+
+        $form->handleRequest();
+
+        return $form;
+    }
+
+    protected function logIn(User $user)
+    {
+        $this->getSession()->set('login', true);
+        $this->getSession()->set('name', $user->getName());
+        $this->getSession()->set('id', $user->getId());
+
+        return new RedirectResponse('/admin');
     }
 }

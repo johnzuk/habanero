@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -14,53 +15,89 @@ class AdminController extends Controller
 {
     public function indexAction()
     {
-        return $this->render('admin.base.html.twig');
+        if ($this->isLogin()) {
+            return $this->render('admin.base.html.twig');
+        }
+
+        return new RedirectResponse('/login');
     }
 
     public function pagesAction()
     {
-        $em = $this->getEntityManager();
-        $repository = $em->getRepository('Front\Entity\Page');
-        $pages = $repository->findAll();
+        if ($this->isLogin()) {
+            $em = $this->getEntityManager();
+            $repository = $em->getRepository('Front\Entity\Page');
+            $pages = $repository->findAll();
 
-        return $this->render('admin.pages.html.twig', [
-            'pages' => $pages
-        ]);
+            return $this->render('admin.pages.html.twig', [
+                'pages' => $pages
+            ]);
+        }
+
+        return new RedirectResponse('/login');
     }
 
     public function pageDeleteAction()
     {
-        $response = [
-            'status' => false
-        ];
+        if ($this->isLogin()) {
+            $response = [
+                'status' => false
+            ];
 
-        if ($id = $this->request->request->get('id')) {
-            $em = $this->getEntityManager();
-            $repository = $em->getRepository('Front\Entity\Page');
-            $page = $repository->find($id);
+            if ($id = $this->request->request->get('id')) {
+                $em = $this->getEntityManager();
+                $repository = $em->getRepository('Front\Entity\Page');
+                $page = $repository->find($id);
 
-            if ($page) {
-                $em->remove($page);
-                $em->flush();
-                $response['status'] = true;
+                if ($page) {
+                    $em->remove($page);
+                    $em->flush();
+                    $response['status'] = true;
+                }
             }
+
+            return new JsonResponse($response);
         }
 
-        return new JsonResponse($response);
+        return new RedirectResponse('/login');
     }
 
     public function pageAction($pageId = null)
     {
-        $em = $this->getEntityManager();
-        $repository = $em->getRepository('Front\Entity\Page');
+        if ($this->isLogin()) {
+            $em = $this->getEntityManager();
+            $repository = $em->getRepository('Front\Entity\Page');
 
-        $page = new Page();
-        $saveLabel = 'Create Page';
-        if ($pageId !== null) {
-            $page = $repository->find($pageId);
-            $saveLabel = 'Save Page';
+            $page = new Page();
+
+            if ($pageId !== null) {
+                $page = $repository->find($pageId);
+            }
+            $form = $this->getPageForm($page);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em->persist($page);
+                $em->flush();
+            }
+
+            return $this->render('admin.page.html.twig', [
+                'form' => $form->createView(),
+            ]);
         }
 
+        return new RedirectResponse('/login');
+    }
+
+    public function usersAction()
+    {
+    }
+
+    /**
+     * @param Page $page
+     * @return \Symfony\Component\Form\Form
+     */
+    protected function getPageForm(Page $page)
+    {
         $form = $this->createFormBuilder($page)
             ->add('title', TextType::class, [
                 'label' => 'Title',
@@ -99,7 +136,7 @@ class AdminController extends Controller
                 ]
             ])
             ->add('save', SubmitType::class, [
-                'label' => $saveLabel,
+                'label' => 'Save',
                 'attr' => [
                     'class' => 'btn btn-success pull-right'
                 ]
@@ -107,22 +144,14 @@ class AdminController extends Controller
             ->getForm();
         $form->handleRequest();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em->persist($page);
-            $em->flush();
-        }
-
-        return $this->render('admin.page.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return $form;
     }
 
-    public function usersAction()
+    /**
+     * @return bool
+     */
+    protected function isLogin()
     {
-        return $this->render('base.html.twig', [
-            'name' => 'jan'
-        ]);
-        //return new Response("To jest moja pierwsza strona WWW");
+        return ($this->getSession()->get('login') &&  $this->getSession()->get('id'));
     }
 }
