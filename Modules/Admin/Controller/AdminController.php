@@ -90,6 +90,17 @@ class AdminController extends Controller
 
     public function usersAction()
     {
+        if ($this->isLogin()) {
+            $em = $this->getEntityManager();
+            $repository = $em->getRepository('Front\Entity\User');
+            $users = $repository->findAll();
+
+            return $this->render('admin.users.html.twig', [
+                'users' => $users
+            ]);
+        }
+
+        return new RedirectResponse('/login');
     }
 
     /**

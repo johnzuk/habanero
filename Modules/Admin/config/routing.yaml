@@ -20,3 +20,7 @@ admin_page_delete_route:
   path: '/admin/page/delete'
   action: 'Admin:pageDelete'
   method: 'post'
+
+admin_users_route:
+  path: '/admin/users'
+  action: 'Admin:users'
