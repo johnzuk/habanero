@@ -124,11 +124,10 @@ class Boot
     {
         $this->loadRouting();
 
-        $this->prepareDoctrine();
-        $this->buildViewRender();
+        $this->buildServices();
         $this->validator = Validation::createValidator();
         $this->buildContainer();
-        $this->prepareMailer();
+
         $this->prepareFormFactory();
 
         if (php_sapi_name() != "cli") {
@@ -150,9 +149,11 @@ class Boot
         }
     }
 
-    protected function buildViewRender()
+    protected function buildServices()
     {
+        $this->entityManager = (new DoctrineService())->getService($this->config);
         $this->viewRender = (new TwigService())->getService($this->config);
+        $this->mailer = (new MailService())->getService($this->config);
     }
 
     /**
@@ -186,16 +187,6 @@ class Boot
         $this->formFactory = Forms::createFormFactoryBuilder()
             ->addExtension(new ValidatorExtension($this->validator))
             ->getFormFactory();
-    }
-
-    protected function prepareMailer()
-    {
-        $this->mailer = (new MailService())->getService($this->config);
-    }
-
-    protected function prepareDoctrine()
-    {
-        $this->entityManager = (new DoctrineService())->getService($this->config);
     }
 
     protected function buildContainer()
