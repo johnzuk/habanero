@@ -173,7 +173,17 @@ class Boot
         $this->controller->setRequest($this->request);
         $this->controller->setFormFactory($this->formFactory);
 
-        return call_user_func_array([$this->controller, $method], $vars);
+        if (method_exists($this->controller, 'beforeRoute')) {
+            call_user_func_array([$this->controller, 'beforeRoute'], [$method, $vars]);
+        }
+
+        $result = call_user_func_array([$this->controller, $method], $vars);
+
+        if (method_exists($this->controller, 'afterRoute')) {
+            call_user_func_array([$this->controller, 'afterRoute'], [$method, $vars]);
+        }
+
+        return $result;
     }
 
     public function prepareFormFactory()

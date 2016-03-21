@@ -52,7 +52,7 @@ class TwigService implements ServiceInterface
             new FormExtension(new TwigRenderer($formEngine))
         );
 
-        $function = new \Twig_Function('asset', function ($name) use ($config) {
+        $function = new \Twig_Function('asset', function ($name = '') use ($config) {
             return $config->getBaseUrl().'/'.$name;
         });
         $viewRender->addFunction($function);

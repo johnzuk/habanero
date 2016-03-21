@@ -29,6 +29,7 @@ class FrontController extends Controller
         $em = $this->getEntityManager();
         $repository = $em->getRepository('Front\Entity\User');
         $form = $this->getLoginForm();
+        $error = '';
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -46,12 +47,15 @@ class FrontController extends Controller
                 if (password_verify($password, $user->getPassword())) {
                     return $this->logIn($user);
                 }
+            } else {
+                $error = 'Bad login or password';
             }
         }
 
         return $this->render('login.html.twig', [
             'title' => 'Login',
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'error' => $error
         ]);
     }
 

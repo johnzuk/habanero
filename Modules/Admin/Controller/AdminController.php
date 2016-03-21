@@ -23,7 +23,7 @@ class AdminController extends Controller
             return $this->render('admin.base.html.twig');
         }
 
-        return new RedirectResponse('/login');
+        return $this->getRedirectToLogin();
     }
 
     public function pagesAction()
@@ -38,7 +38,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return new RedirectResponse('/login');
+        return $this->getRedirectToLogin();
     }
 
     public function pageAction($pageId = null)
@@ -64,7 +64,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return new RedirectResponse('/login');
+        return $this->getRedirectToLogin();
     }
 
     public function pageDeleteAction()
@@ -89,7 +89,7 @@ class AdminController extends Controller
             return new JsonResponse($response);
         }
 
-        return new RedirectResponse('/login');
+        return $this->getRedirectToLogin();
     }
 
     public function usersAction()
@@ -104,7 +104,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return new RedirectResponse('/login');
+        return $this->getRedirectToLogin();
     }
 
     public function userAction($userId = null)
@@ -136,7 +136,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return new RedirectResponse('/login');
+        return $this->getRedirectToLogin();
     }
 
     public function userDeleteAction()
@@ -161,7 +161,7 @@ class AdminController extends Controller
             return new JsonResponse($response);
         }
 
-        return new RedirectResponse('/login');
+        return $this->getRedirectToLogin();
     }
 
     /**
@@ -264,6 +264,14 @@ class AdminController extends Controller
         $form->handleRequest();
 
         return $form;
+    }
+
+    /**
+     * @return RedirectResponse
+     */
+    protected function getRedirectToLogin()
+    {
+        return new RedirectResponse($this->request->getBaseUrl().'/login');
     }
 
     /**
