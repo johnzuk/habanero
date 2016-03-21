@@ -67,7 +67,7 @@ class FrontController extends Controller
     {
         $this->getSession()->clear();
 
-        return new RedirectResponse('/');
+        return new RedirectResponse($this->request->getBaseUrl().'/');
     }
 
     public function registerAction()
@@ -93,7 +93,7 @@ class FrontController extends Controller
             $em->flush();
 
             $this->sendRegisterEmail($user);
-            return new RedirectResponse('/login');
+            return new RedirectResponse($this->request->getBaseUrl().'/login');
         } else if ($checkUser) {
             $error = 'This email address is already usage in our system.';
         }
@@ -223,6 +223,6 @@ class FrontController extends Controller
         $this->getSession()->set('name', $user->getName());
         $this->getSession()->set('id', $user->getId());
 
-        return new RedirectResponse('/admin');
+        return new RedirectResponse($this->request->getBaseUrl().'/admin');
     }
 }

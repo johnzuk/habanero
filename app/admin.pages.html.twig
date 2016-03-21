@@ -2,7 +2,7 @@
 
 {% block body %}
     <div class="table-responsive">
-        <a class="btn btn-primary" href="/admin/page">Add</a>
+        <a class="btn btn-primary" href="{{ asset('admin/page') }}">Add</a>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -19,7 +19,7 @@
                         <td>{{ page.pageName }}</td>
                         <td>{{ page.slug }}</td>
                         <td>
-                            <a class="btn btn-primary btn-sm" href="/admin/page/{{ page.id }}"><i class="fa fa-edit"></i></a>
+                            <a class="btn btn-primary btn-sm" href="{{ asset('admin/page') }}/{{ page.id }}"><i class="fa fa-edit"></i></a>
                             <button class="btn btn-danger btn-sm page-delete" data-id="{{ page.id }}"><i class="fa fa-trash"></i></button>
                         </td>
                     </tr>

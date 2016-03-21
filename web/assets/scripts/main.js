@@ -1,5 +1,4 @@
 $(function(){
-
     $('.page-delete').on('click', function() {
         var id = $(this).data('id');
         var $row = $(this).parent().parent();
@@ -7,7 +6,7 @@ $(function(){
         bootbox.confirm("<h3>Do you really want to delete this page?</h3>", function(result) {
             if (result) {
                 $.ajax({
-                    url: '/admin/page/delete',
+                    url: basePath+'admin/page/delete',
                     dataType: 'json',
                     type: 'post',
                     data: {
@@ -31,7 +30,7 @@ $(function(){
         bootbox.confirm("<h3>Do you really want to delete this user?</h3>", function(result) {
             if (result) {
                 $.ajax({
-                    url: '/admin/user/delete',
+                    url: basePath+'admin/user/delete',
                     dataType: 'json',
                     type: 'post',
                     data: {
