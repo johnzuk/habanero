@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class FrontController extends Controller
 {
@@ -43,10 +45,12 @@ class FrontController extends Controller
                 ->getQuery()
                 ->getOneOrNullResult();
 
-            if ($user !== null) {
+            if ($user) {
                 if (password_verify($password, $user->getPassword())) {
                     return $this->logIn($user);
                 }
+
+                $error = 'Bad login or password';
             } else {
                 $error = 'Bad login or password';
             }
@@ -71,7 +75,13 @@ class FrontController extends Controller
         $user = new User();
         $form = $this->getRegisterForm($user);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        $em = $this->getEntityManager();
+        $repository = $em->getRepository('Front\Entity\User');
+        $error = '';
+
+        $checkUser = $repository->findOneByEmail($user->getEmail());
+
+        if ($form->isSubmitted() && $form->isValid() && !$checkUser) {
 
             $em = $this->getEntityManager();
             $password = password_hash($user->getPlainPassword(), PASSWORD_BCRYPT, [
@@ -84,11 +94,14 @@ class FrontController extends Controller
 
             $this->sendRegisterEmail($user);
             return new RedirectResponse('/login');
+        } else if ($checkUser) {
+            $error = 'This email address is already usage in our system.';
         }
 
         return $this->render('register.html.twig', [
             'title' => 'Rejestracja',
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'error' => $error
         ]);
     }
 
@@ -142,6 +155,12 @@ class FrontController extends Controller
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
+                'constraints' => [
+                    new NotBlank(),
+                    new Length([
+                        'min' => 6
+                    ])
+                ],
                 'first_options'  => [
                     'label' => 'Password',
                     'attr' => [
