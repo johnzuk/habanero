@@ -1,6 +1,7 @@
 <?php
 namespace Habanero\Framework\Config;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Yaml\Parser;
 use Habanero\Exceptions\NoConfigException;
 
@@ -26,14 +27,35 @@ class Config implements \ArrayAccess
     protected $config;
 
     /**
+     * @var Request
+     */
+    protected $request;
+
+    /**
      * Config constructor.
      * @param string $mainPath
+     * @param Request $request
      */
-    public function __construct($mainPath)
+    public function __construct($mainPath, Request $request)
     {
         $this->mainPath = $mainPath;
         $this->parser = new Parser();
+        $this->request = $request;
+
         $this->loadConfig();
+    }
+
+    /**
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    public function getBaseUrl()
+    {
+        return $this->request->getBaseUrl();
     }
 
     /**

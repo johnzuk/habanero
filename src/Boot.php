@@ -20,12 +20,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Forms;
-use Symfony\Bridge\Twig\Form\TwigRendererEngine;
-use Symfony\Bridge\Twig\Extension\FormExtension;
-use Symfony\Bridge\Twig\Form\TwigRenderer;
-use Symfony\Component\Translation\Translator;
-use Symfony\Component\Translation\Loader\XliffFileLoader;
-use Symfony\Bridge\Twig\Extension\TranslationExtension;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use FastRoute\Dispatcher;
@@ -115,7 +109,7 @@ class Boot
     public function __construct($mainDirectory)
     {
         $this->handleRequest();
-        $this->config = new Config($mainDirectory);
+        $this->config = new Config($mainDirectory, $this->request);
 
         $this->parser = new Parser();
     }
