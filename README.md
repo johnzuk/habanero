@@ -14,9 +14,9 @@
 2. Install [gulp](http://gulpjs.com) and [Bower](http://bower.io/) globally with `npm install -g gulp bower`
 3. Clone repository with `git clone git@github.com:johnzuk/habanero.git`
 4. Run `composer install`
-5. Copy **config.yaml.dist** to **config.yaml** for example `cp app/config.yaml.dist app/config.yaml`
+5. Copy **config.yaml.dist** to **config.yaml**
 6. Set valid parameters in to config.yaml: database name etc.
-7. Set your access rights on cache. `chmod 777 cache/`
+7. Set your access rights on cache `chmod 777 cache/`
 8. Create schema with `php vendor/bin/doctrine orm:schema-tool:create`
 9. Go to web/
 10. Run `npm install`
