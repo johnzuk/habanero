@@ -12,3 +12,5 @@ config.yaml
 /web/node_modules
 /web/dist/*
 !/web/dist/.gitkeep
+/app/cache/*
+!/app/cache/.gitkeep
